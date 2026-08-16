@@ -1,0 +1,89 @@
+-- 1. Carrega a Biblioteca Visual (Orion Lib)
+local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
+
+-- Lista de palavras para gerar senhas aleatórias e engraçadas
+local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal", "adminOculto", "chocolateComArroz", "robloxLover", "noobMaster", "senhaFacil77"}
+
+-- 2. Cria a Janela Principal do GuHub
+local Window = OrionLib:MakeWindow({
+    Name = "GuHub 🚀", 
+    HidePremium = false, 
+    SaveConfig = false
+})
+
+-- 3. Cria a aba principal
+local Tab = Window:MakeTab({
+    Name = "Painel Hack",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+Tab:AddLabel("Digite o usuário para descobrir a senha:")
+
+-- 4. Cria a caixa de entrada para digitar o nome da vítima
+Tab:AddInput({
+    Name = "Nome do Jogador:",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(textoDigitado)
+        -- Remove espaços em branco do nome
+        local username = string.gsub(textoDigitado, "^%s*(.-)%s*$", "%1")
+        if username == "" then return end
+        
+        -- Tenta buscar os dados reais do jogador no Roblox
+        local sucesso, userId = pcall(function()
+            return game.Players:GetUserIdFromNameAsync(username)
+        end)
+        
+        if sucesso then
+            -- Se achar o jogador, pega a foto de perfil dele (Thumbnail)
+            local thumbType = Enum.ThumbnailType.HeadShot
+            local thumbSize = Enum.ThumbnailSize.Size150x150
+            local fotoUrl, carregou = game.Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
+            
+            -- Sorteia uma palavra aleatória da nossa lista
+            local senhaAleatoria = palavrasEngracadas[math.random(1, #palavrasEngracadas)] .. math.random(100, 999)
+            
+            -- Efeito visual de carregamento falso (Trollagem)
+            OrionLib:MakeNotification({
+                Name = "GuHub System",
+                Content = "Conectando ao banco de dados do Roblox...",
+                Duration = 2
+            })
+            task.wait(2)
+            
+            OrionLib:MakeNotification({
+                Name = "GuHub System",
+                Content = "Buscando dados de: " .. username .. " (50%)",
+                Duration = 2
+            })
+            task.wait(2)
+
+            OrionLib:MakeNotification({
+                Name = "GuHub System",
+                Content = "Bypass de segurança concluído! (100%)",
+                Duration = 1.5
+            })
+            task.wait(1.5)
+            
+            -- Exibe o resultado final com a foto real da vítima e a senha falsa
+            OrionLib:MakeNotification({
+                Name = "Alvo: " .. username,
+                Content = "Senha Encontrada: " .. senhaAleatoria,
+                Image = fotoUrl, -- Mostra a foto real da conta
+                Duration = 10
+            })
+        else
+            -- Se o nome não existir no Roblox, mostra erro
+            OrionLib:MakeNotification({
+                Name = "Erro de Conexão",
+                Content = "Jogador não encontrado. Verifique se digitou o nome correto.",
+                Image = "rbxassetid://4483345998",
+                Duration = 4
+            })
+        end
+    end
+})
+
+-- Inicializa o menu na tela do celular
+OrionLib:Init()
