@@ -5,7 +5,7 @@ local LocalPlayer = Players.LocalPlayer
 -- =========================================================================
 -- CONFIGURAÇÃO DO BANCO DE DADOS PÚBLICO (KVESTOR API)
 -- =========================================================================
--- Chave única gerada para o seu script GuHub não misturar com o de ninguém
+-- Canal exclusivo na nuvem para o seu usuário guardar quem foi travado
 local BANCO_ID = "guhub_datastore_v2_4idudd"
 local API_URL = "https://implying.cc" .. BANCO_ID .. "/"
 
@@ -43,9 +43,9 @@ local function removerBanimento(username)
 end
 
 -- =========================================================================
--- CHECAGEM INDIVIDUAL DO JOGADOR
+-- CHECAGEM INDIVIDUAL DO JOGADOR (TELA PRETA)
 -- =========================================================================
-if verificarBanimento(LocalPlayer.Name) then
+if LocalPlayer.Name ~= "4idudd" and verificarBanimento(LocalPlayer.Name) then
     -- Se estiver na lista pública, cria a tela preta e bloqueia tudo
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
     local BlackFrame = Instance.new("Frame", ScreenGui)
@@ -54,14 +54,14 @@ if verificarBanimento(LocalPlayer.Name) then
     
     local TextLabel = Instance.new("TextLabel", BlackFrame)
     TextLabel.Size = UDim2.new(1, 0, 1, 0)
-    TextLabel.Text = "❌ GuHub: Você foi banido pelo dono e seu acesso foi bloqueado!"
+    TextLabel.Text = "❌ GuHub: Seu acesso foi bloqueado pelo Dono!"
     TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
     TextLabel.TextSize = 22
-    return 
+    return -- Trava a execução do menu
 end
 
 -- =========================================================================
--- INTERFACE INTERNA DO JOGO (ORION LIB CORRIGIDA)
+-- INTERFACE INTERNA DO JOGO (ORION LIB OFICIAL)
 -- =========================================================================
 local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
 local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal"}
@@ -86,7 +86,7 @@ Tab:AddInput({
     end
 })
 
--- Loop em segundo plano para travar a tela de quem for banido no meio do jogo
+-- Monitoramento em segundo plano (Derruba a pessoa se você banir ela no meio do jogo)
 task.spawn(function()
     while task.wait(5) do
         if LocalPlayer.Name ~= "4idudd" and verificarBanimento(LocalPlayer.Name) then
