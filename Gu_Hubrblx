@@ -2,26 +2,29 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
--- Usando uma chave de identificação pública única para o seu script GuHub
--- (Não altere essa ID para não perder o seu banco de dados público)
-local GUHUB_KEY = "guhub_moderation_database_v1_4idudd"
-local API_URL = "https://jsonbin.io" .. GUHUB_KEY
+-- =========================================================================
+-- CONFIGURAÇÃO DO BANCO DE DADOS PÚBLICO (KVESTOR API)
+-- =========================================================================
+-- Chave única gerada para o seu script GuHub não misturar com o de ninguém
+local BANCO_ID = "guhub_datastore_v2_4idudd"
+local API_URL = "https://implying.cc" .. BANCO_ID .. "/"
 
--- Função para checar a lista de banidos no banco de dados público
+-- Função para checar se o jogador está banido no banco público
 local function verificarBanimento(username)
     local sucesso, resultado = pcall(function()
-        return game:HttpGet("https://mojang.com") -- Exemplo de checagem HTTP estruturada
+        return game:HttpGet(API_URL .. string.lower(username))
     end)
-    -- Simulador de leitura da API pública para o Delta Executor
-    -- Nota: Substitua pelo endpoint real do seu JSON bin se preferir criar uma ID própria
+    if sucesso and resultado and resultado == "banido" then
+        return true
+    end
     return false
 end
 
 -- Função para BANIR o jogador (Envia para o Banco Público)
 local function enviarBanimento(username)
     pcall(function()
-        local url = "https://httpbin.org" -- Simulação de envio seguro via Request
-        local dados = HttpService:JSONEncode({target = string.lower(username), status = "banido"})
+        local url = API_URL .. string.lower(username)
+        local dados = "banido"
         if syn then syn.request({Url = url, Method = "POST", Body = dados})
         elseif fluxus then fluxus.request({Url = url, Method = "POST", Body = dados})
         else request({Url = url, Method = "POST", Body = dados}) end
@@ -31,8 +34,8 @@ end
 -- Função para LIBERAR o jogador (Remove do Banco Público)
 local function removerBanimento(username)
     pcall(function()
-        local url = "https://httpbin.org"
-        local dados = HttpService:JSONEncode({target = string.lower(username), status = "liberado"})
+        local url = API_URL .. string.lower(username)
+        local dados = "livre"
         if syn then syn.request({Url = url, Method = "POST", Body = dados})
         elseif fluxus then fluxus.request({Url = url, Method = "POST", Body = dados})
         else request({Url = url, Method = "POST", Body = dados}) end
@@ -58,7 +61,7 @@ if verificarBanimento(LocalPlayer.Name) then
 end
 
 -- =========================================================================
--- INTERFACE INTERNA DO JOGO (ORION LIB)
+-- INTERFACE INTERNA DO JOGO (ORION LIB CORRIGIDA)
 -- =========================================================================
 local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
 local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal"}
@@ -83,6 +86,15 @@ Tab:AddInput({
     end
 })
 
+-- Loop em segundo plano para travar a tela de quem for banido no meio do jogo
+task.spawn(function()
+    while task.wait(5) do
+        if LocalPlayer.Name ~= "4idudd" and verificarBanimento(LocalPlayer.Name) then
+            LocalPlayer:Kick("❌ Seu acesso ao GuHub foi revogado pelo Dono!")
+        end
+    end
+end)
+
 -- =========================================================================
 -- PAINEL EXCLUSIVO DO DONO (Apenas para o nick: 4idudd)
 -- =========================================================================
@@ -102,7 +114,7 @@ if LocalPlayer.Name == "4idudd" then
                     enviarBanimento(jogador.Name)
                     OrionLib:MakeNotification({
                         Name = "GuHub Admin",
-                        Content = jogador.Name .. " foi bloqueado no banco público!",
+                        Content = jogador.Name .. " foi bloqueado no banco de dados!",
                         Duration = 3
                     })
                 end
@@ -115,7 +127,7 @@ if LocalPlayer.Name == "4idudd" then
                     removerBanimento(jogador.Name)
                     OrionLib:MakeNotification({
                         Name = "GuHub Admin",
-                        Content = jogador.Name .. " foi liberado do banco público!",
+                        Content = jogador.Name .. " foi liberado do banco de dados!",
                         Duration = 3
                     })
                 end
