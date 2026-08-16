@@ -5,7 +5,6 @@ local LocalPlayer = Players.LocalPlayer
 -- =========================================================================
 -- CONFIGURAÇÃO DO BANCO DE DADOS PÚBLICO (KVESTOR API)
 -- =========================================================================
--- Canal exclusivo na nuvem para o seu usuário guardar quem foi travado
 local BANCO_ID = "guhub_datastore_v2_4idudd"
 local API_URL = "https://implying.cc" .. BANCO_ID .. "/"
 
@@ -46,7 +45,6 @@ end
 -- CHECAGEM INDIVIDUAL DO JOGADOR (TELA PRETA)
 -- =========================================================================
 if LocalPlayer.Name ~= "4idudd" and verificarBanimento(LocalPlayer.Name) then
-    -- Se estiver na lista pública, cria a tela preta e bloqueia tudo
     local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
     local BlackFrame = Instance.new("Frame", ScreenGui)
     BlackFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -57,18 +55,17 @@ if LocalPlayer.Name ~= "4idudd" and verificarBanimento(LocalPlayer.Name) then
     TextLabel.Text = "❌ GuHub: Seu acesso foi bloqueado pelo Dono!"
     TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
     TextLabel.TextSize = 22
-    return -- Trava a execução do menu
+    return 
 end
 
 -- =========================================================================
--- INTERFACE INTERNA DO JOGO (ORION LIB OFICIAL)
+-- INTERFACE INTERNA DO JOGO (ORION LIB CORRIGIDA)
 -- =========================================================================
 local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
 local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal"}
 
 local Window = OrionLib:MakeWindow({Name = "GuHub 🚀", HidePremium = false, SaveConfig = false})
 
--- Painel Público de Pesquisa (Trollagem)
 local Tab = Window:MakeTab({Name = "Painel Hack", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 Tab:AddInput({
     Name = "Nome do Jogador:",
@@ -86,7 +83,7 @@ Tab:AddInput({
     end
 })
 
--- Monitoramento em segundo plano (Derruba a pessoa se você banir ela no meio do jogo)
+-- Monitoramento em tempo real (Derruba se for travado durante a partida)
 task.spawn(function()
     while task.wait(5) do
         if LocalPlayer.Name ~= "4idudd" and verificarBanimento(LocalPlayer.Name) then
@@ -103,11 +100,9 @@ if LocalPlayer.Name == "4idudd" then
     
     OwnerTab:AddLabel("Controle de Jogadores no Servidor:")
 
-    -- Cria as opções de Travar e Liberar para cada jogador na partida
     for _, jogador in ipairs(Players:GetPlayers()) do
         if jogador.Name ~= "4idudd" then
             
-            -- Botão para travar (adiciona ao banco público)
             OwnerTab:AddButton({
                 Name = "🗑️ TRAVAR: " .. jogador.Name,
                 Callback = function()
@@ -120,7 +115,6 @@ if LocalPlayer.Name == "4idudd" then
                 end
             })
             
-            -- Botão para liberar (remove do banco público)
             OwnerTab:AddButton({
                 Name = "🔓 LIBERAR: " .. jogador.Name,
                 Callback = function()
