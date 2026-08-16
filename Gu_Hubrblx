@@ -6,7 +6,7 @@ local LocalPlayer = Players.LocalPlayer
 -- CONFIGURAÇÃO DO BANCO DE DADOS PÚBLICO (KVESTOR API)
 -- =========================================================================
 local BANCO_ID = "guhub_datastore_v2_4idudd"
-local API_URL = "https://implying.cc" .. BANCO_ID .. "/" -- CORRIGIDO: Adicionada a barra "/" que faltava
+local API_URL = "https://implying.cc" .. BANCO_ID .. "/" -- FIX: Barra adicionada
 
 -- Função para checar se o jogador está banido no banco público
 local function verificarBanimento(username)
@@ -39,7 +39,7 @@ local function enviarBanimento(username)
     enviarRequisicao(API_URL .. string.lower(username), "banido")
 end
 
--- Função para LIBERAR o jogador (Remove do Banco Público)
+-- Function para LIBERAR o jogador (Remove do Banco Público)
 local function removerBanimento(username)
     enviarRequisicao(API_URL .. string.lower(username), "livre")
 end
@@ -64,7 +64,7 @@ end
 -- =========================================================================
 -- INTERFACE INTERNA DO JOGO (ORION LIB CORRIGIDA)
 -- =========================================================================
--- CORRIGIDO: Link completo e direto para carregar a OrionLib no Delta
+-- FIX: Link Raw completo da biblioteca OrionLib para Roblox
 local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
 local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal"}
 
@@ -103,7 +103,7 @@ if LocalPlayer.Name == "4idudd" then
     local OwnerTab = Window:MakeTab({Name = "👑 Moderação (Dono)", Icon = "rbxassetid://4483345998", PremiumOnly = false})
     OwnerTab:AddLabel("Controle de Jogadores no Servidor:")
 
-    -- Função otimizada para gerar botões dinamicamente para os alvos
+    -- Gerador dinâmico de botões para os alvos
     local function criarBotoesParaJogador(jogador)
         if jogador.Name == "4idudd" then return end
         
@@ -132,12 +132,12 @@ if LocalPlayer.Name == "4idudd" then
         })
     end
 
-    -- Cria os botões para quem já está na partida
+    -- Cria botões para jogadores atuais
     for _, jogador in ipairs(Players:GetPlayers()) do
         criarBotoesParaJogador(jogador)
     end
 
-    -- CORRIGIDO: Adiciona botões automaticamente quando novos jogadores entrarem
+    -- Monitora novos jogadores que entrarem
     Players.PlayerAdded:Connect(criarBotoesParaJogador)
 end
 
