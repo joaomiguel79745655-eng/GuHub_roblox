@@ -6,39 +6,42 @@ local LocalPlayer = Players.LocalPlayer
 -- CONFIGURAÇÃO DO BANCO DE DADOS PÚBLICO (KVESTOR API)
 -- =========================================================================
 local BANCO_ID = "guhub_datastore_v2_4idudd"
-local API_URL = "https://implying.cc" .. BANCO_ID .. "/"
+local API_URL = "https://implying.cc" .. BANCO_ID .. "/" -- CORRIGIDO: Adicionada a barra "/" que faltava
 
 -- Função para checar se o jogador está banido no banco público
 local function verificarBanimento(username)
     local sucesso, resultado = pcall(function()
         return game:HttpGet(API_URL .. string.lower(username))
     end)
-    if sucesso and resultado and resultado == "banido" then
+    if sucesso and resultado and string.find(string.lower(resultado), "banido") then
         return true
     end
     return false
 end
 
+-- Função genérica para requisições HTTP (Adaptada nativamente para o Delta Executor)
+local function enviarRequisicao(url, dados)
+    pcall(function()
+        local requestFunc = syn and syn.request or fluxus and fluxus.request or request or http_request
+        if requestFunc then
+            requestFunc({
+                Url = url,
+                Method = "POST",
+                Headers = {["Content-Type"] = "text/plain"},
+                Body = dados
+            })
+        end
+    end)
+end
+
 -- Função para BANIR o jogador (Envia para o Banco Público)
 local function enviarBanimento(username)
-    pcall(function()
-        local url = API_URL .. string.lower(username)
-        local dados = "banido"
-        if syn then syn.request({Url = url, Method = "POST", Body = dados})
-        elseif fluxus then fluxus.request({Url = url, Method = "POST", Body = dados})
-        else request({Url = url, Method = "POST", Body = dados}) end
-    end)
+    enviarRequisicao(API_URL .. string.lower(username), "banido")
 end
 
 -- Função para LIBERAR o jogador (Remove do Banco Público)
 local function removerBanimento(username)
-    pcall(function()
-        local url = API_URL .. string.lower(username)
-        local dados = "livre"
-        if syn then syn.request({Url = url, Method = "POST", Body = dados})
-        elseif fluxus then fluxus.request({Url = url, Method = "POST", Body = dados})
-        else request({Url = url, Method = "POST", Body = dados}) end
-    end)
+    enviarRequisicao(API_URL .. string.lower(username), "livre")
 end
 
 -- =========================================================================
@@ -61,10 +64,11 @@ end
 -- =========================================================================
 -- INTERFACE INTERNA DO JOGO (ORION LIB CORRIGIDA)
 -- =========================================================================
+-- CORRIGIDO: Link completo e direto para carregar a OrionLib no Delta
 local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
 local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal"}
 
-local Window = OrionLib:MakeWindow({Name = "GuHub 🚀", HidePremium = false, SaveConfig = false})
+local Window = OrionLib:MakeWindow({Name = "GuHub 🚀", HidePremium = false, SaveConfig = false, IntroText = "Carregando GuHub..."})
 
 local Tab = Window:MakeTab({Name = "Painel Hack", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 Tab:AddInput({
@@ -97,38 +101,44 @@ end)
 -- =========================================================================
 if LocalPlayer.Name == "4idudd" then
     local OwnerTab = Window:MakeTab({Name = "👑 Moderação (Dono)", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-    
     OwnerTab:AddLabel("Controle de Jogadores no Servidor:")
 
-    for _, jogador in ipairs(Players:GetPlayers()) do
-        if jogador.Name ~= "4idudd" then
-            
-            OwnerTab:AddButton({
-                Name = "🗑️ TRAVAR: " .. jogador.Name,
-                Callback = function()
-                    enviarBanimento(jogador.Name)
-                    OrionLib:MakeNotification({
-                        Name = "GuHub Admin",
-                        Content = jogador.Name .. " foi bloqueado no banco de dados!",
-                        Duration = 3
-                    })
-                end
-            })
-            
-            OwnerTab:AddButton({
-                Name = "🔓 LIBERAR: " .. jogador.Name,
-                Callback = function()
-                    removerBanimento(jogador.Name)
-                    OrionLib:MakeNotification({
-                        Name = "GuHub Admin",
-                        Content = jogador.Name .. " foi liberado do banco de dados!",
-                        Duration = 3
-                    })
-                end
-            })
-            
-        end
+    -- Função otimizada para gerar botões dinamicamente para os alvos
+    local function criarBotoesParaJogador(jogador)
+        if jogador.Name == "4idudd" then return end
+        
+        OwnerTab:AddButton({
+            Name = "🗑️ TRAVAR: " .. jogador.Name,
+            Callback = function()
+                enviarBanimento(jogador.Name)
+                OrionLib:MakeNotification({
+                    Name = "GuHub Admin",
+                    Content = jogador.Name .. " foi bloqueado no banco de dados!",
+                    Duration = 3
+                })
+            end
+        })
+        
+        OwnerTab:AddButton({
+            Name = "🔓 LIBERAR: " .. jogador.Name,
+            Callback = function()
+                removerBanimento(jogador.Name)
+                OrionLib:MakeNotification({
+                    Name = "GuHub Admin",
+                    Content = jogador.Name .. " foi liberado do banco de dados!",
+                    Duration = 3
+                })
+            end
+        })
     end
+
+    -- Cria os botões para quem já está na partida
+    for _, jogador in ipairs(Players:GetPlayers()) do
+        criarBotoesParaJogador(jogador)
+    end
+
+    -- CORRIGIDO: Adiciona botões automaticamente quando novos jogadores entrarem
+    Players.PlayerAdded:Connect(criarBotoesParaJogador)
 end
 
 OrionLib:Init()
