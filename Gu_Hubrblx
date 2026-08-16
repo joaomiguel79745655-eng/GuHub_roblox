@@ -1,0 +1,128 @@
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Usando uma chave de identificação pública única para o seu script GuHub
+-- (Não altere essa ID para não perder o seu banco de dados público)
+local GUHUB_KEY = "guhub_moderation_database_v1_4idudd"
+local API_URL = "https://jsonbin.io" .. GUHUB_KEY
+
+-- Função para checar a lista de banidos no banco de dados público
+local function verificarBanimento(username)
+    local sucesso, resultado = pcall(function()
+        return game:HttpGet("https://mojang.com") -- Exemplo de checagem HTTP estruturada
+    end)
+    -- Simulador de leitura da API pública para o Delta Executor
+    -- Nota: Substitua pelo endpoint real do seu JSON bin se preferir criar uma ID própria
+    return false
+end
+
+-- Função para BANIR o jogador (Envia para o Banco Público)
+local function enviarBanimento(username)
+    pcall(function()
+        local url = "https://httpbin.org" -- Simulação de envio seguro via Request
+        local dados = HttpService:JSONEncode({target = string.lower(username), status = "banido"})
+        if syn then syn.request({Url = url, Method = "POST", Body = dados})
+        elseif fluxus then fluxus.request({Url = url, Method = "POST", Body = dados})
+        else request({Url = url, Method = "POST", Body = dados}) end
+    end)
+end
+
+-- Função para LIBERAR o jogador (Remove do Banco Público)
+local function removerBanimento(username)
+    pcall(function()
+        local url = "https://httpbin.org"
+        local dados = HttpService:JSONEncode({target = string.lower(username), status = "liberado"})
+        if syn then syn.request({Url = url, Method = "POST", Body = dados})
+        elseif fluxus then fluxus.request({Url = url, Method = "POST", Body = dados})
+        else request({Url = url, Method = "POST", Body = dados}) end
+    end)
+end
+
+-- =========================================================================
+-- CHECAGEM INDIVIDUAL DO JOGADOR
+-- =========================================================================
+if verificarBanimento(LocalPlayer.Name) then
+    -- Se estiver na lista pública, cria a tela preta e bloqueia tudo
+    local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+    local BlackFrame = Instance.new("Frame", ScreenGui)
+    BlackFrame.Size = UDim2.new(1, 0, 1, 0)
+    BlackFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    
+    local TextLabel = Instance.new("TextLabel", BlackFrame)
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.Text = "❌ GuHub: Você foi banido pelo dono e seu acesso foi bloqueado!"
+    TextLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    TextLabel.TextSize = 22
+    return 
+end
+
+-- =========================================================================
+-- INTERFACE INTERNA DO JOGO (ORION LIB)
+-- =========================================================================
+local OrionLib = loadstring(game:HttpGet(('https://githubusercontent.com')))()
+local palavrasEngracadas = {"batata123", "senhaSegura99", "banidoAmanha", "capivaraDoMal"}
+
+local Window = OrionLib:MakeWindow({Name = "GuHub 🚀", HidePremium = false, SaveConfig = false})
+
+-- Painel Público de Pesquisa (Trollagem)
+local Tab = Window:MakeTab({Name = "Painel Hack", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+Tab:AddInput({
+    Name = "Nome do Jogador:",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(textoDigitado)
+        local username = string.gsub(textoDigitado, "^%s*(.-)%s*$", "%1")
+        if username == "" then return end
+        local sucesso, userId = pcall(function() return Players:GetUserIdFromNameAsync(username) end)
+        if sucesso then
+            local fotoUrl = Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+            local senhaAleatoria = palavrasEngracadas[math.random(1, #palavrasEngracadas)] .. math.random(100, 999)
+            OrionLib:MakeNotification({Name = "Alvo: " .. username, Content = "Senha: " .. senhaAleatoria, Image = fotoUrl, Duration = 5})
+        end
+    end
+})
+
+-- =========================================================================
+-- PAINEL EXCLUSIVO DO DONO (Apenas para o nick: 4idudd)
+-- =========================================================================
+if LocalPlayer.Name == "4idudd" then
+    local OwnerTab = Window:MakeTab({Name = "👑 Moderação (Dono)", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+    
+    OwnerTab:AddLabel("Controle de Jogadores no Servidor:")
+
+    -- Cria as opções de Travar e Liberar para cada jogador na partida
+    for _, jogador in ipairs(Players:GetPlayers()) do
+        if jogador.Name ~= "4idudd" then
+            
+            -- Botão para travar (adiciona ao banco público)
+            OwnerTab:AddButton({
+                Name = "🗑️ TRAVAR: " .. jogador.Name,
+                Callback = function()
+                    enviarBanimento(jogador.Name)
+                    OrionLib:MakeNotification({
+                        Name = "GuHub Admin",
+                        Content = jogador.Name .. " foi bloqueado no banco público!",
+                        Duration = 3
+                    })
+                end
+            })
+            
+            -- Botão para liberar (remove do banco público)
+            OwnerTab:AddButton({
+                Name = "🔓 LIBERAR: " .. jogador.Name,
+                Callback = function()
+                    removerBanimento(jogador.Name)
+                    OrionLib:MakeNotification({
+                        Name = "GuHub Admin",
+                        Content = jogador.Name .. " foi liberado do banco público!",
+                        Duration = 3
+                    })
+                end
+            })
+            
+        end
+    end
+end
+
+OrionLib:Init()
